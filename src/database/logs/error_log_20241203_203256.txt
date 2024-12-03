@@ -1,0 +1,4 @@
+2024-12-03 20:32:56,713 - MainThread - INFO - Database connection established successfully
+2024-12-03 20:32:56,889 - MainThread - INFO - Successfully inserted 100 customer records
+2024-12-03 20:32:57,081 - MainThread - INFO - Successfully inserted 100 support ticket records
+2024-12-03 20:32:57,081 - MainThread - INFO - Database connection closed successfully

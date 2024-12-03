@@ -1,3 +1,13 @@
+'''
+Author - Aditya Bhatt 20:27 PM 03-12-2024
+
+NOTE-
+1.
+
+BUG:
+1.
+'''
+
 import pyodbc
 import logging
 from typing import Optional
@@ -24,8 +34,6 @@ logging.basicConfig(
 
 # Get logger instance
 logger = logging.getLogger(__name__)
-
-
 
 def create_database_connection() -> Optional[pyodbc.Connection]:
         """
