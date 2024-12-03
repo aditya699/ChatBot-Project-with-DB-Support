@@ -1,0 +1,4 @@
+2024-12-03 20:14:46,577 - MainThread - INFO - Database connection established successfully
+2024-12-03 20:14:46,609 - MainThread - INFO - Tables created successfully
+2024-12-03 20:14:46,609 - MainThread - INFO - Database connection closed successfully
+2024-12-03 20:14:46,609 - MainThread - INFO - Database connection closed successfully

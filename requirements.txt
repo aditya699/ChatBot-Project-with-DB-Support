@@ -1,0 +1,7 @@
+flask
+anthropic
+python-dotenv
+pyodbc
+pytest
+pandas
+numpy

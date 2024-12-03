@@ -1,2 +1,4 @@
-# ChatBot-Project-with-DB-Support
-This is a repository for chatbot project along side DB Access
+# Problem Statement
+Customer service representatives often need to quickly access customer information while handling support tickets, which typically requires navigating multiple database queries and screens. This process is time-consuming and can lead to longer response times and reduced customer satisfaction.
+
+This chatbot solution allows support staff to retrieve customer information using natural language queries. By integrating with our customer database, the bot can instantly fetch relevant customer data through simple conversational commands, helping support staff provide faster and more efficient customer service.
