@@ -17,6 +17,7 @@ llm = ChatAnthropic(
     # other params...
 )
 
+
 @cl.set_starters
 async def set_starters():
     return [
@@ -32,7 +33,7 @@ async def set_starters():
             icon="/public/tickets.PNG",
             ),
         cl.Starter(
-            label="Can help me general Query",
+            label="Can you help me with general Query",
             message="What is AI?",
             icon="/public/query.PNG",
             )
@@ -46,8 +47,23 @@ def on_chat_start():
 async def main(message: cl.Message):
 
     user=message.content
+    history=cl.chat_context.to_openai()
+    CHAT_PROMPT=f'''
+    You are a helpful assitant that helps people
+    User_Question:
+    {user}
 
-    response="The Bot is under Development"
+    History:
+    {history}
+
+    '''
+    print(history)
+    print(CHAT_PROMPT)
+
+    
+
+    # response="The Bot is under Development"
+    response=llm.invoke(CHAT_PROMPT).content
 
     # Send a response back to the user
     await cl.Message(
