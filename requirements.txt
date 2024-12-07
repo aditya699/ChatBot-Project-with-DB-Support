@@ -8,4 +8,5 @@ numpy
 faker
 chainlit
 langchain-anthropic
+langchain_core
 pydantic==2.10.1

@@ -7,6 +7,8 @@ from langchain_anthropic import ChatAnthropic
 load_dotenv()
 ANTHROPIC_API_KEY=os.getenv("ANTHROPIC_API_KEY")
 
+
+
 llm = ChatAnthropic(
     model="claude-3-haiku-20240307",
     temperature=0,
@@ -16,6 +18,7 @@ llm = ChatAnthropic(
     api_key=ANTHROPIC_API_KEY
     # other params...
 )
+
 
 
 @cl.set_starters
@@ -33,7 +36,7 @@ async def set_starters():
             icon="/public/tickets.PNG",
             ),
         cl.Starter(
-            label="Can you help me with general Query",
+            label="Can you help me with general query",
             message="What is AI?",
             icon="/public/query.PNG",
             )
