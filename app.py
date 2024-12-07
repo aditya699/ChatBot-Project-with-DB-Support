@@ -23,18 +23,18 @@ async def set_starters():
         cl.Starter(
             label="General Company Policies",
             message="Can help with leave Policy",
-            icon="static/images/policy.svg",
+            icon="/public/policy.svg",
             ),
 
         cl.Starter(
             label="General Tickets Information",
             message="Can help you with all Customer Related Information",
-            icon="static/images/tickets.PNG",
+            icon="/public/tickets.PNG",
             ),
         cl.Starter(
             label="Can help me general Query",
             message="What is AI?",
-            icon="static/images/query.PNG",
+            icon="/public/query.PNG",
             )
         ]
 
