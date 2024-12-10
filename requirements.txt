@@ -11,3 +11,4 @@ langchain-anthropic
 langchain-core == 0.2.19
 pydantic==2.10.1
 ipykernel
+aiohttp
