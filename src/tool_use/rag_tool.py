@@ -22,46 +22,49 @@ loader = PyPDFLoader(file_path)
 
 docs = loader.load()
 
-print(len(docs))
+# print(len(docs))
 
-print(docs[4].page_content[0:100])
-print(docs[0].metadata)
-os.environ["GOOGLE_API_KEY"] =os.getenv("GEMINI_API_KEY")
+# print(docs[4].page_content[0:100])
+# print(docs[0].metadata)
+# os.environ["GOOGLE_API_KEY"] =os.getenv("GEMINI_API_KEY")
 
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+# embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=500)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=500)
+
 splits = text_splitter.split_documents(docs)
-vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+print(len(splits))
+print(splits[8])
+# vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
 
-retriever = vectorstore.as_retriever()
-
-
-os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
-
-llm = ChatAnthropic(model="claude-3-haiku-20240307",max_tokens=4092)
+# retriever = vectorstore.as_retriever()
 
 
-system_prompt = (
-    "You are an assistant for question-answering tasks. "
-    "Use the following pieces of retrieved context to answer "
-    "the question. If you don't know the answer, say that you "
-    "don't know. "
-    "\n\n"
-    "{context}"
-)
+# os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", system_prompt),
-        ("human", "{input}"),
-    ]
-)
+# llm = ChatAnthropic(model="claude-3-haiku-20240307",max_tokens=4092)
 
 
-question_answer_chain = create_stuff_documents_chain(llm, prompt)
-rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+# system_prompt = (
+#     "You are an assistant for question-answering tasks. "
+#     "Use the following pieces of retrieved context to answer "
+#     "the question. If you don't know the answer, say that you "
+#     "don't know. "
+#     "\n\n"
+#     "{context}"
+# )
 
-results = rag_chain.invoke({"input": "What is social media policy in my organisation?"})
-print(results["context"][0].page_content)
+# prompt = ChatPromptTemplate.from_messages(
+#     [
+#         ("system", system_prompt),
+#         ("human", "{input}"),
+#     ]
+# )
+
+
+# question_answer_chain = create_stuff_documents_chain(llm, prompt)
+# rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+
+# results = rag_chain.invoke({"input": "What is social media policy in my organisation?"})
+# print(results["context"][0].page_content)
 
