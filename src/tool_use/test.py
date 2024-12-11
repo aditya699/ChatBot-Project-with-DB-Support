@@ -1,54 +1,35 @@
-
-
 import asyncio
-from dotenv import load_dotenv
-from anthropic import Anthropic
 
-# Load environment variables from .env file
-load_dotenv()
+async def make_coffee():
+    print("Starting to make coffee")
+    await asyncio.sleep(2)  # This lets other tasks run!
+    print("Coffee ready")
 
-# Initialize Anthropic client
-client = Anthropic()
-
-SEM = asyncio.Semaphore(5)  # Limit to 5 concurrent API calls
-
-async def classify_text(prompt: str) -> dict:
-    """Classify text as positive or negative using the Anthropic Claude API."""
-    async with SEM:  # Limit concurrency
-        try:
-            classification_prompt = (
-                f"Classify the following text as positive or negative sentiment: \"{prompt}\". "
-                "Reply with 'positive' or 'negative' only."
-            )
-            response = client.messages.create(
-                model="claude-3-haiku-20240307",
-                messages=[{"role": "user", "content": classification_prompt}],
-                max_tokens=10,
-                tools=[]
-            )
-            
-            # Access the text of the first message
-            classification = response.content[0].text.strip().lower()
-            return {"text": prompt, "classification": classification}
-        except Exception as e:
-            return {"text": prompt, "classification": "Error", "error": str(e)}
+async def make_toast():
+    print("Starting to make toast")
+    await asyncio.sleep(3)  # This lets other tasks run!
+    print("Toast ready")
 
 async def main():
-    prompts = [
-        "I loved the product, it was fantastic!",
-        "This is the worst service I have ever received.",
-        "The experience was neutral, neither good nor bad.",
-        "Highly recommend this to everyone!",
-        "I would not buy this again.",
-        "The quality could have been better.",
-        "This was an amazing experience!"
-    ]
+    # This takes only 3 seconds because they run at the same time!
+    await asyncio.gather(make_coffee(), make_toast())
 
-    tasks = [classify_text(prompt) for prompt in prompts]
-    results = await asyncio.gather(*tasks)
+# Run our async program
+asyncio.run(main())
 
-    for result in results:
-        print(result)
+# Synchronous (old way)
+import time
 
-if __name__ == "__main__":
-    asyncio.run(main())
+def make_coffee():
+    print("Starting to make coffee")
+    time.sleep(2)  # This blocks everything!
+    print("Coffee ready")
+
+def make_toast():
+    print("Starting to make toast")
+    time.sleep(3)  # This blocks everything!
+    print("Toast ready")
+
+# This takes 5 seconds total because it runs one after another
+make_coffee()
+make_toast()
