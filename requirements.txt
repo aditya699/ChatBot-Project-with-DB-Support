@@ -8,7 +8,11 @@ numpy
 faker
 chainlit
 langchain-anthropic
-langchain-core == 0.2.19
-pydantic==2.10.1
+langchain-core
+pydantic=2.10.1
 ipykernel
 aiohttp
+pypdf 
+langchain_community
+langchain_chroma
+langchain-google-genai
