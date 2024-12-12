@@ -40,7 +40,6 @@ def create_dummy_ticket_data():
     }
     return pd.DataFrame(data)
 
-# Function to query ticket data
 def query_ticket_data(ticket_id=None, query_type='status'):
     """Query ticket information based on ticket ID"""
     df = create_dummy_ticket_data()
@@ -53,6 +52,7 @@ def query_ticket_data(ticket_id=None, query_type='status'):
         if query_type == 'status':
             return f"""
             Ticket Details for {ticket_id}:
+            Customer: {ticket['customer_name'].iloc[0]}
             Status: {ticket['status'].iloc[0]}
             Priority: {ticket['priority'].iloc[0]}
             Issue Type: {ticket['issue_type'].iloc[0]}
@@ -71,7 +71,6 @@ def query_ticket_data(ticket_id=None, query_type='status'):
             """
     return "Please provide a valid ticket ID"
 
-# Existing health plan recommendation function
 def recommend_health_plan(height: float, weight: float) -> str:
     """Recommends a health plan based on BMI calculation."""
     if height <= 0 or weight <= 0:
@@ -104,7 +103,19 @@ def recommend_health_plan(height: float, weight: float) -> str:
         - Regular health assessments
         - Specialist consultations"""
 
-# Setup RAG chain
+def query_document(user_query: str, rag_chain) -> str:
+    """
+    Queries the document based on user's question using enhanced RAG.
+    """
+    try:
+        if rag_chain is None:
+            return "Document querying system is not initialized properly."
+        
+        results = rag_chain.invoke({"input": user_query})
+        return results['answer']
+    except Exception as e:
+        return f"Error processing query: {str(e)}"
+
 def setup_rag_chain():
     """Sets up and returns the RAG chain"""
     try:
@@ -138,9 +149,9 @@ def setup_rag_chain():
         print(f"Error setting up RAG chain: {str(e)}")
         return None
 
-# Tool configurations
-health_plan_tool = {
-    "name": "health_plan_recommender",
+# Tool configurations with corrected names
+health_tool = {
+    "name": "recommend_health_plan",
     "description": "Health plan recommendation system based on BMI calculation.",
     "input_schema": {
         "type": "object",
@@ -152,8 +163,8 @@ health_plan_tool = {
     }
 }
 
-document_query_tool = {
-    "name": "document_querier",
+document_tool = {
+    "name": "query_document",
     "description": "Tool for querying company documents and policies.",
     "input_schema": {
         "type": "object",
@@ -164,8 +175,8 @@ document_query_tool = {
     }
 }
 
-ticket_query_tool = {
-    "name": "ticket_querier",
+ticket_tool = {
+    "name": "query_ticket_data",
     "description": "Tool for querying ticket information and statistics.",
     "input_schema": {
         "type": "object",
@@ -214,11 +225,11 @@ async def process_with_claude(prompt, profile, rag_chain=None):
                 model="claude-3-haiku-20240307",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=3000,
-                tools=[health_plan_tool]
+                tools=[health_tool]
             )
             if response.stop_reason == "tool_use":
                 tool_use = response.content[-1]
-                if tool_use.name == "health_plan_recommender":
+                if tool_use.name == "recommend_health_plan":
                     return recommend_health_plan(tool_use.input["height"], tool_use.input["weight"])
             return response.content[0].text
 
@@ -227,11 +238,11 @@ async def process_with_claude(prompt, profile, rag_chain=None):
                 model="claude-3-haiku-20240307",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=3000,
-                tools=[document_query_tool]
+                tools=[document_tool]
             )
             if response.stop_reason == "tool_use" and rag_chain:
                 tool_use = response.content[-1]
-                if tool_use.name == "document_querier":
+                if tool_use.name == "query_document":
                     return query_document(tool_use.input["query"], rag_chain)
             return response.content[0].text
 
@@ -240,11 +251,11 @@ async def process_with_claude(prompt, profile, rag_chain=None):
                 model="claude-3-haiku-20240307",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=3000,
-                tools=[ticket_query_tool]
+                tools=[ticket_tool]
             )
             if response.stop_reason == "tool_use":
                 tool_use = response.content[-1]
-                if tool_use.name == "ticket_querier":
+                if tool_use.name == "query_ticket_data":
                     return query_ticket_data(
                         tool_use.input["ticket_id"],
                         tool_use.input["query_type"]
@@ -276,22 +287,59 @@ async def main(message: cl.Message):
     user = message.content
     history = cl.chat_context.to_openai()
     
-    CHAT_PROMPT = f'''
-    You are a helpful assistant in {chat_profile} mode.
-    For Health Advisor: Recommend health plans based on BMI.
-    For Company Policies: Find relevant policy information.
-    For Ticket Management: Help with ticket queries and statistics.
-    For General Chat: Engage in regular conversation.
+    profile_prompts = {
+        "General Chat": f'''
+            You are a friendly and conversational assistant. Engage naturally with users and have pleasant discussions about any topic.
+            
+            User Question: {user}
+            History: {history}
+        ''',
+        
+        "Health Advisor": f'''
+            You are a friendly health advisor. 
+            Use the recommend_health_plan tool when someone specifically asks for a health plan recommendation 
+            and provides their height and weight. 
+            IMPORTANT :
+            Whenever some gives weight and height always invoke recommend_health_plan tool
+            If they ask about health plans but don't provide measurements, 
+            simply ask for their height and weight.
+            
+            User Question: {user}
+            History: {history}
+        ''',
+        
+        "Company Policies": f'''
+            You are a helpful company representative who can discuss workplace topics and assist with policy information.
+            
+            When someone specifically asks about company policies or rules, use the query_document tool to find 
+            the relevant information. 
+            
+            For general workplace discussions, just chat normally.(Only use the tool when you do not know answer based on company policy)
+            
+            User Question: {user}
+            History: {history}
+        ''',
+        
+        "Ticket Management": f'''
+            You are a helpful customer service representative who can assist with ticket inquiries.
+            
+            Use the query_ticket_data tool only when:
+            - Someone asks about a specific ticket (use query_type: "status")
+            - Someone asks for overall ticket statistics (use query_type: "statistics")
+            
+            For general questions about customer service or other topics, simply engage in conversation.
+            
+            User Question: {user}
+            History: {history}
+        '''
+    }
     
-    User_Question:
-    {user}
-
-    History:
-    {history}
-    '''
+    CHAT_PROMPT = profile_prompts.get(
+        chat_profile,
+        f"You are a helpful assistant. User Question: {user}"
+    )
     
     response = await process_with_claude(CHAT_PROMPT, chat_profile, rag_chain)
     await cl.Message(content=response).send()
-
 if __name__ == "__main__":
     cl.run()
