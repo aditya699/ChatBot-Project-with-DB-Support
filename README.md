@@ -11,9 +11,8 @@ A versatile ChatBot built with Chainlit and Claude that provides multiple servic
 - [Feature Details](#feature-details)
 - [Error Handling](#error-handling)
 - [Contributing](#contributing)
-- [Requirements](#requirements)
 - [Support](#support)
-- [License](#license)
+
 
 ## Features
 
